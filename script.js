@@ -35,8 +35,7 @@ updateUI();
 
 function showImage(kana){
   img.classList.remove("boom");
-  img.src = `images/${kana}.png`;
-  // “ババーン”演出
+  img.src = `images/${kana}.jpg`; // ★ jpg対応
   setTimeout(() => img.classList.add("boom"), 40);
 }
 
@@ -56,28 +55,22 @@ function stopRollingAndCommit(finalKana){
   updateUI();
 }
 
-function startRolling(){
-  if (unused.length === 0) return alert("全部出ました");
+// 🎰 ランダム
+randomBtn.addEventListener("click", () => {
+  if (rollingTimer || unused.length === 0) return;
 
-  // 連打対策
   randomBtn.disabled = true;
   decideBtn.disabled = true;
 
   rollingTimer = setInterval(() => {
     const k = randomKana();
-    img.src = `images/${k}.png`;
+    img.src = `images/${k}.jpg`; // ★ jpg対応
   }, 55);
 
   stopTimer = setTimeout(() => {
     const finalKana = randomKana();
     stopRollingAndCommit(finalKana);
   }, 2000);
-}
-
-// 🎰 ランダム
-randomBtn.addEventListener("click", () => {
-  if (rollingTimer) return;
-  startRolling();
 });
 
 // ⌨️ 入力決定
