@@ -17,9 +17,6 @@ let used = [];
 let rollingTimer = null;
 let stopTimer = null;
 
-// ★ basePath を自動生成（GitHub Pages / ローカル両対応）
-const basePath = location.pathname.replace(/\/[^/]*$/, "");
-
 const img = document.getElementById("kanaImage");
 const usedList = document.getElementById("usedList");
 const remainEl = document.getElementById("remain");
@@ -36,9 +33,9 @@ function updateUI(){
 }
 updateUI();
 
+// ★ ここが超重要：シンプルな相対パス
 function imgUrl(kana){
-  // 例: https://n-kou7.github.io/50on/images/to.png
-  return `${basePath}/images/${kana}.png`;
+  return `images/${kana}.png`;
 }
 
 function showImage(kana){
@@ -53,8 +50,8 @@ function randomKana(){
 
 function stopRollingAndCommit(finalKana){
   clearInterval(rollingTimer);
-  rollingTimer = null;
   clearTimeout(stopTimer);
+  rollingTimer = null;
   stopTimer = null;
 
   showImage(finalKana);
@@ -71,8 +68,7 @@ randomBtn.addEventListener("click", () => {
   decideBtn.disabled = true;
 
   rollingTimer = setInterval(() => {
-    const k = randomKana();
-    img.src = imgUrl(k);
+    img.src = imgUrl(randomKana());
   }, 55);
 
   stopTimer = setTimeout(() => {
