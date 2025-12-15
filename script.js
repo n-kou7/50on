@@ -33,7 +33,7 @@ function updateUI(){
 }
 updateUI();
 
-// ★ ここが超重要：シンプルな相対パス
+// ★ png固定・相対パス（これが一番安全）
 function imgUrl(kana){
   return `images/${kana}.png`;
 }
