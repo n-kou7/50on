@@ -12,15 +12,13 @@ const kanaMap = {
 };
 
 const kanaList = Object.keys(kanaMap);
-
 let unused = [...kanaList];
 let used = [];
 
 let rollingTimer = null;
 let stopTimer = null;
 
-// ★ iOS対策：最初のタップで Audio を「鳴らせる状態」にする
-let decisionSound = new Audio("se/decision.mp3");
+const decisionSound = new Audio("se/decision.mp3");
 decisionSound.preload = "auto";
 
 const img = document.getElementById("kanaImage");
@@ -31,17 +29,7 @@ const decideBtn = document.getElementById("decideBtn");
 const resetBtn = document.getElementById("resetBtn");
 const inputKana = document.getElementById("inputKana");
 
-/* ---------- 共通 ---------- */
-
-function normalizeHiragana(str){
-  return str
-    .trim()
-    .normalize("NFC"); // 結合文字対策
-}
-
-function imgUrl(k){
-  return `images/${k}.png`;
-}
+function imgUrl(k){ return `images/${k}.png`; }
 
 function flash(){
   document.body.classList.add("flash");
@@ -53,89 +41,60 @@ function playSound(){
   decisionSound.play();
 }
 
-function showImage(k){
-  img.classList.remove("boom");
-  img.src = imgUrl(k);
-  setTimeout(()=>img.classList.add("boom"),40);
-}
-
 function updateUI(){
-  // ★ 終了音は「ひらがな表示」
-  usedList.textContent = used.map(k => kanaMap[k]).join("　");
+  usedList.textContent = used.map(k=>kanaMap[k]).join("　");
   remainEl.textContent = `のこり：${unused.length} / 46`;
 }
 
-/* ---------- 決定処理 ---------- */
-
 function commit(k){
-  showImage(k);
-  playSound();   // ★ ユーザー操作内で鳴る
+  img.src = imgUrl(k);
+  playSound();
   flash();
-
   used.push(k);
-  unused = unused.filter(x => x !== k);
+  unused = unused.filter(x=>x!==k);
   updateUI();
 }
 
-function stopRollingAndCommit(k){
-  clearInterval(rollingTimer);
-  clearTimeout(stopTimer);
-  rollingTimer = null;
-  stopTimer = null;
-  commit(k);
-}
-
-/* ---------- ランダム ---------- */
-
-randomBtn.addEventListener("click", () => {
-  // ★ 無音再生で iOS を解除
+randomBtn.onclick = ()=>{
+  // iOS解除
   decisionSound.play().then(()=>decisionSound.pause());
 
-  if (rollingTimer || unused.length === 0) return;
+  if(rollingTimer || unused.length===0) return;
 
   rollingTimer = setInterval(()=>{
     img.src = imgUrl(unused[Math.floor(Math.random()*unused.length)]);
-  },55);
+  },60);
 
   stopTimer = setTimeout(()=>{
-    stopRollingAndCommit(
-      unused[Math.floor(Math.random()*unused.length)]
-    );
+    clearInterval(rollingTimer);
+    rollingTimer=null;
+    commit(unused[Math.floor(Math.random()*unused.length)]);
   },2000);
-});
+};
 
-/* ---------- 入力決定 ---------- */
-
-decideBtn.addEventListener("click", () => {
-  // ★ iOS解除
+decideBtn.onclick = ()=>{
   decisionSound.play().then(()=>decisionSound.pause());
 
-  const hira = normalizeHiragana(inputKana.value);
+  const hira = inputKana.value.trim().normalize("NFC");
+  const k = kanaList.find(key=>kanaMap[key]===hira);
 
-  const k = kanaList.find(key => kanaMap[key] === hira);
-
-  if (!k || !unused.includes(k)){
+  if(!k || !unused.includes(k)){
     alert("まだ のこっていない ひらがなです");
     return;
   }
+  commit(k);
+};
 
-  stopRollingAndCommit(k);
-});
-
-/* ---------- リセット ---------- */
-
-resetBtn.addEventListener("click", () => {
+resetBtn.onclick = ()=>{
   clearInterval(rollingTimer);
   clearTimeout(stopTimer);
-  rollingTimer = null;
-  stopTimer = null;
-
-  unused = [...kanaList];
-  used = [];
-  img.src = "";
-  img.classList.remove("boom");
-  inputKana.value = "";
+  rollingTimer=null;
+  stopTimer=null;
+  unused=[...kanaList];
+  used=[];
+  img.src="";
+  inputKana.value="";
   updateUI();
-});
+};
 
 updateUI();
